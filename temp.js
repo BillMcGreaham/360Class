@@ -12,8 +12,9 @@ class kalmanFilter(object):
 		self.SumZ = np.array(([25,0],[0,25]))
 		self.SumT = np.array(([100,0,0,0,0,0],[0,0.1,0,0,0,0],[0,0,0.1,0,0,0],[0,0,0,100,0,0],[0,0,0,0,0.1,0],[0,0,0,0,0,0.1]))
 		self.utNow = np.array(([0],[0],[0],[0],[0],[0]))
-		#self.equation = np.dot(np.dot(self.F, self.SumT), self.F.T) + self.SumX
-		self.equation = ((self.F * self.SumT) * self.F.T) + self.SumX
+		self.equation = np.dot(np.dot(self.F, self.SumT), self.F.T) + self.SumX
+		self.counter = 0
+		#self.equation = ((self.F * self.SumT) * self.F.T) + self.SumX
 		print "equation: ",self.equation
 		self.future_time = 0
 
@@ -26,7 +27,7 @@ class kalmanFilter(object):
 		return angle_difference*-1
 
 	# TODO: calculate the time difference between the enemy tank getting to firing location and the bullet getting to that same firing location
-	# me and enemy are objects that store the tank attributes, like x, y, angle, etc.
+	# me and enemy are objects that store the tank's attributes, like x, y, angle, etc.
 	def fire(self, me, enemy):
 		#bullet travels 100 pixels a second
 		#distance formula
@@ -47,17 +48,17 @@ class kalmanFilter(object):
 		Zt = np.array(([enemy.x],[enemy.y]))
 
 		#equation = F*sumT*F*T + SumX
-		self.equation = ((self.F * self.SumT) * self.F.T) + self.SumX
+		self.equation = np.dot(np.dot(self.F, self.SumT), self.F.T) + self.SumX
 
 		#KtNow = equation*H*T*(H*(equation)*H*T+sumZ) -1
 		'''Step by step dot products of above equation'''
 		one =  np.dot(self.equation , self.H.T)
 		two = np.dot(self.H , one)
-	
 		three = (two + self.SumZ)
 		ktNow = np.dot(one, np.linalg.inv(three))
-		#ktNow = (self.equation * self.H.T) * ((self.H * self.equation) * (self.H.T + self.SumZ))
-		#print "ktNow: ", ktNow
+		#                       1           4         2                1           3
+		#ktNow = (self.equation * self.H.T) * (self.H * (self.equation * self.H.T) + self.SumZ)^-1
+		print "ktNow: ", ktNow
 				
 		#utNow = F*utNow +  KtNow*((zt+1) - H*F*utNow)
 		'''Step by step dot products of above equation'''
@@ -67,7 +68,8 @@ class kalmanFilter(object):
 		si = Zt - san
 		wu = np.dot(ktNow, si)
 		self.utNow = yi + wu
-		#self.utNow = (self.F * self.utNow) + (ktNow * (Zt - ((self.H * self.F) * self.utNow)))
+		#                      1            6        5     4          2         3
+		#self.utNow = (self.F * self.utNow) + (ktNow * (Zt - ((self.H * self.F) * self.utNow))))
 		print "utNow: ",self.utNow
 
 
@@ -76,6 +78,7 @@ class kalmanFilter(object):
 		eins = np.dot(ktNow, self.H)
 		zwei = (np.identity(6) - eins)
 		self.SumT = np.dot(zwei, self.equation)
+		#                            2       1         3
 		#self.SumT = (np.identity(6) - ktNow * self.H) * self.equation
 
 		#self.future_time -= 2.0
@@ -84,8 +87,13 @@ class kalmanFilter(object):
 	#check an additional .01 seconds into the future
 	def more_kalman(self):
 		self.future_time+=0.01
+		self.counter+=1
+		
 		newResult = np.dot(self.F , self.utNow)
 		self.utNow = newResult
+		
+		if self.counter%100 == 0:
+			print "Guess ", newResult, float(newResult[0]), float(newResult[3])
 		return newResult
 
 	def main():
