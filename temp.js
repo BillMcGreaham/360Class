@@ -53,8 +53,8 @@ class kalmanFilter(object):
 		'''Step by step dot products of above equation'''
 		one =  np.dot(self.equation , self.H.T)
 		two = np.dot(self.H , one)
-		twoTwo = np.dot(two, self.H.T)
-		three = (twoTwo + self.SumZ)
+	
+		three = (two + self.SumZ)
 		ktNow = np.dot(one, np.linalg.inv(three))
 		#ktNow = (self.equation * self.H.T) * ((self.H * self.equation) * (self.H.T + self.SumZ))
 		#print "ktNow: ", ktNow
