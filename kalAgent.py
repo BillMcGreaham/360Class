@@ -30,7 +30,7 @@ class Agent(object):
         self.bzrc = bzrc
         self.constants = self.bzrc.get_constants()
         self.commands = []
-
+        self.futureTime = 0.0
         self.kalman = kalmanFilter()
 
     def tick(self, time_diff):
@@ -51,10 +51,8 @@ class Agent(object):
 
         # Reset my set of commands (we don't want to run old commands)
         self.commands = []
-        #print time_diff, time_diff % 2.0
-        if time_diff % 2.0 < 0.001:
-            print "Ping"
-            self.kalman.calc_kalman(self.enemies[0])
+        self.kalman.calc_kalman(self.enemies[0])
+
         # Decide what to do with my tank
         self.attack_enemies(self.mytanks[0])
 
@@ -75,6 +73,7 @@ class Agent(object):
 
         command = Command(0, 0, rotate, fire)
         self.commands.append(command)
+        self.futureTime+=.02
 
 
     def move_to_position(self, bot, target_x, target_y):
