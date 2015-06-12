@@ -26,7 +26,7 @@ class kalmanFilter(object):
 		return angle_difference*-1
 
 	# TODO: calculate the time difference between the enemy tank getting to firing location and the bullet getting to that same firing location
-	# me and enemy are objects that store the tank's attributes, like x, y, angle, etc.
+	# me and enemy are objects that store the tank attributes, like x, y, angle, etc.
 	def fire(self, me, enemy):
 		#bullet travels 100 pixels a second
 		#distance formula
