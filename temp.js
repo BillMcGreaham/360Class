@@ -52,7 +52,7 @@ class kalmanFilter(object):
 		#KtNow = equation*H*T*(H*(equation)*H*T+sumZ) -1
 		'''Step by step dot products of above equation'''
 		one =  np.dot(self.equation , self.H.T)
-		two = np.dot(self.H , self.equation)
+		two = np.dot(self.H , one)
 		twoTwo = np.dot(two, self.H.T)
 		three = (twoTwo + self.SumZ)
 		ktNow = np.dot(one, np.linalg.inv(three))
