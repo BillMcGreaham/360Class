@@ -32,9 +32,12 @@ class kalmanFilter(object):
 		#bullet travels 100 pixels a second
 		#distance formula
 		distance = ((enemy.x-me.x)**2 + (enemy.y-me.y)**2)**(0.5)
-		#print "Distance: ",distance, "  Time:",self.future_time
+		print "Distance: ",distance, "  Time:",self.future_time
 		if abs(distance/100 - self.future_time) < .1:
+			print "88888888888888888888888888888888888888888888888888888"
 			return True
+		#elif distance/100 > self.future_time:
+			#self.future_time -=.2
 		else:
 			return False
 
@@ -46,7 +49,7 @@ class kalmanFilter(object):
 	def calc_kalman(self, enemy):
 		print "Kalman Time"
 		Zt = np.array(([enemy.x],[enemy.y]))
-
+		print "Z is: ",Zt
 		#equation = F*sumT*F*T + SumX
 		self.equation = np.dot(np.dot(self.F, self.SumT), self.F.T) + self.SumX
 
@@ -58,7 +61,7 @@ class kalmanFilter(object):
 		ktNow = np.dot(one, np.linalg.inv(three))
 		#                       1           4         2                1           3
 		#ktNow = (self.equation * self.H.T) * (self.H * (self.equation * self.H.T) + self.SumZ)^-1
-		print "ktNow: ", ktNow
+		#print "ktNow: ", ktNow
 				
 		#utNow = F*utNow +  KtNow*((zt+1) - H*F*utNow)
 		'''Step by step dot products of above equation'''
@@ -70,7 +73,7 @@ class kalmanFilter(object):
 		self.utNow = yi + wu
 		#                      1            6        5     4          2         3
 		#self.utNow = (self.F * self.utNow) + (ktNow * (Zt - ((self.H * self.F) * self.utNow))))
-		print "utNow: ",self.utNow
+		#print "utNow: ",self.utNow
 
 
 		#EtNow = (IdentityMatrix - (ktNow)*H)*(equation)
@@ -84,17 +87,20 @@ class kalmanFilter(object):
 		#self.future_time -= 2.0
 		return self.utNow
 
-	#check an additional .01 seconds into the future
+	#check an additional .1 seconds into the future
 	def more_kalman(self):
-		self.future_time+=0.01
+		
+		self.future_time =.1
 		self.counter+=1
+		print self.future_time
+		tempArray = np.array(([1,self.future_time,(self.future_time**2)/2,0,0,0],[0,1,self.future_time,0,0,0],[0,self.c*-1,1,0,0,0],[0,0,0,1,self.future_time,(self.future_time**2)/2],[0,0,0,0,1,self.future_time],[0,0,0,0,self.c*-1,1]))
+
+		self.utNow = np.dot(tempArray , self.utNow)
+		#self.utNow = newResult
 		
-		newResult = np.dot(self.F , self.utNow)
-		self.utNow = newResult
-		
-		if self.counter%100 == 0:
-			print "Guess ", newResult, float(newResult[0]), float(newResult[3])
-		return newResult
+		#if self.counter%10 == 0:
+			#print "Guess ", newResult, float(newResult[0]), float(newResult[3])
+		return self.utNow
 
 	def main():
 		print("Main")
